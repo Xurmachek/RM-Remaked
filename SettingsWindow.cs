@@ -18,15 +18,18 @@ namespace RMPlayer
         public SettingsWindow()
         {
             Title = Lang.Get("settingsWindow.Title");
-            Width = 350;
-            Height = 280;
+            Width = 450;
+            Height = 550;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
             this.SetResourceReference(BackgroundProperty, "WindowBackground");
             this.SourceInitialized += (s, e) => ApplyDarkTitleBar(this);
 
+            var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+            Content = scrollViewer;
+
             var stackPanel = new StackPanel { Margin = new Thickness(20) };
-            Content = stackPanel;
+            scrollViewer.Content = stackPanel;
 
             // Тема
             var themeLabel = new TextBlock { Text = Lang.Get("settingsWindow.ThemeTitle"), Margin = new Thickness(0, 0, 0, 5) };
@@ -72,7 +75,55 @@ namespace RMPlayer
             ttsCheckbox.Unchecked += (_, _) => RM.IsTtsEnabled.Val = false;
             stackPanel.Children.Add(ttsCheckbox);
 
-            var closeBtn = new Button { Content = Lang.Get("settingsWindow.Close"), Width = 100 };
+            // yt-dlp path
+            var ytdlpLabel = new TextBlock { Text = Lang.Get("settingsWindow.YtDlpPath"), Margin = new Thickness(0, 10, 0, 5) };
+            ytdlpLabel.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryText");
+            stackPanel.Children.Add(ytdlpLabel);
+
+            var ytdlpGrid = new Grid { Margin = new Thickness(0, 0, 0, 15) };
+            ytdlpGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            ytdlpGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            
+            var ytdlpBox = new TextBox { Text = RM.YtDlpPath, VerticalAlignment = VerticalAlignment.Center };
+            ytdlpBox.TextChanged += (s, e) => RM.YtDlpPath = ytdlpBox.Text;
+            Grid.SetColumn(ytdlpBox, 0);
+            ytdlpGrid.Children.Add(ytdlpBox);
+
+            var ytdlpBrowse = new Button { Content = Lang.Get("settingsWindow.Browse"), Margin = new Thickness(5, 0, 0, 0), Padding = new Thickness(10, 0, 10, 0) };
+            ytdlpBrowse.Click += (s, e) => {
+                var d = new Microsoft.Win32.OpenFileDialog { Filter = "yt-dlp.exe|yt-dlp.exe|All files|*" };
+                if (d.ShowDialog() == true) ytdlpBox.Text = d.FileName;
+            };
+            Grid.SetColumn(ytdlpBrowse, 1);
+            ytdlpGrid.Children.Add(ytdlpBrowse);
+            stackPanel.Children.Add(ytdlpGrid);
+
+            // FFmpeg path
+            var ffmpegLabel = new TextBlock { Text = Lang.Get("settingsWindow.FfmpegPath"), Margin = new Thickness(0, 10, 0, 5) };
+            ffmpegLabel.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryText");
+            stackPanel.Children.Add(ffmpegLabel);
+
+            var ffmpegGrid = new Grid { Margin = new Thickness(0, 0, 0, 15) };
+            ffmpegGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            ffmpegGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var ffmpegBox = new TextBox { Text = RM.FfmpegPath, VerticalAlignment = VerticalAlignment.Center };
+            ffmpegBox.TextChanged += (s, e) => RM.FfmpegPath = ffmpegBox.Text;
+            Grid.SetColumn(ffmpegBox, 0);
+            ffmpegGrid.Children.Add(ffmpegBox);
+
+            var ffmpegBrowse = new Button { Content = Lang.Get("settingsWindow.Browse"), Margin = new Thickness(5, 0, 0, 0), Padding = new Thickness(10, 0, 10, 0) };
+            ffmpegBrowse.Click += (s, e) => {
+                // Folder selection is tricky in old WPF, using standard hack or System.Windows.Forms is usually needed
+                // But for simplicity let's use OpenFileDialog and get directory
+                var d = new Microsoft.Win32.OpenFileDialog { Title = "Select any file in FFmpeg bin folder", Filter = "All files|*.*" };
+                if (d.ShowDialog() == true) ffmpegBox.Text = Path.GetDirectoryName(d.FileName) ?? "";
+            };
+            Grid.SetColumn(ffmpegBrowse, 1);
+            ffmpegGrid.Children.Add(ffmpegBrowse);
+            stackPanel.Children.Add(ffmpegGrid);
+
+            var closeBtn = new Button { Content = Lang.Get("settingsWindow.Close"), Width = 100, Margin = new Thickness(0, 20, 0, 0) };
             closeBtn.Click += (s, e) => Close();
             stackPanel.Children.Add(closeBtn);
         }

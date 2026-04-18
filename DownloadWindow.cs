@@ -22,6 +22,15 @@ namespace RMPlayer
                 // Принудительно загружаем язык
 			if (Lang.Get("downloadWindow.Title") == "downloadWindow.Title")
 				Lang.Load("ru");
+
+            // Проверка наличия yt-dlp
+            if (!File.Exists(RM.YtDlpPath))
+            {
+                MessageBox.Show(Lang.Get("downloadWindow.YtDlpMissing"), Lang.Get("downloadWindow.Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Закрываем окно после того как оно полностью загрузится, если хотим прервать открытие
+                this.Loaded += (s, e) => Close();
+            }
+
 			// ... остальное
 			Title = Lang.Get("downloadWindow.Title");
             Width = 550;
@@ -133,8 +142,8 @@ namespace RMPlayer
 
         private void RunDownload(string url, string targetDir, bool isAudio)
         {
-            string ytdlpPath = @"C:\Users\Denis\Desktop\YoutubeDLP\yt-dlp.exe";
-            string ffmpegPath = @"C:\Users\Denis\Desktop\YoutubeDLP\ffmpeg-6.1.1-full_build\bin";
+            string ytdlpPath = RM.YtDlpPath;
+            string ffmpegPath = RM.FfmpegPath;
             string fileNameTemplate = @"[%(upload_date>%d.%m.%Y)s] %(title)s.%(ext)s";
             string outputPath = Path.Combine(targetDir, fileNameTemplate);
             string format = isAudio ? "bestaudio/best" : "bestvideo+bestaudio/best";

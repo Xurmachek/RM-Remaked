@@ -55,6 +55,9 @@ namespace RMPlayer
         public static readonly BoolValue IsDarkTheme = new BoolValue(false);
         public static readonly BoolValue IsTtsEnabled = new BoolValue(true);
 
+        public static string YtDlpPath = @"C:\Users\Denis\Desktop\YoutubeDLP\yt-dlp.exe";
+        public static string FfmpegPath = @"C:\Users\Denis\Desktop\YoutubeDLP\ffmpeg-6.1.1-full_build\bin";
+
         public static List<string> AddedPaths = new List<string>();
 
         // --- ВЕРИФИКАЦИЯ ГОЛОСОВ ---
