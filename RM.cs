@@ -57,6 +57,39 @@ namespace RMPlayer
 
         public static List<string> AddedPaths = new List<string>();
 
+        // --- ВЕРИФИКАЦИЯ ГОЛОСОВ ---
+        public static List<Windows.Media.SpeechSynthesis.VoiceInformation> VerifiedVoices = new();
+
+        public static void VerifyVoices()
+        {
+            System.Diagnostics.Debug.WriteLine("TTS: Starting voice verification...");
+            var allVoices = Windows.Media.SpeechSynthesis.SpeechSynthesizer.AllVoices.ToList();
+            var verified = new List<Windows.Media.SpeechSynthesis.VoiceInformation>();
+
+            using var synthesizer = new Windows.Media.SpeechSynthesis.SpeechSynthesizer();
+            foreach (var voice in allVoices)
+            {
+                try
+                {
+                    synthesizer.Voice = voice;
+                    // Тестируем синтез коротким текстом
+                    using var stream = synthesizer.SynthesizeTextToStreamAsync(" ").GetAwaiter().GetResult();
+                    if (stream.Size > 0)
+                    {
+                        verified.Add(voice);
+                        System.Diagnostics.Debug.WriteLine($"TTS: Voice verified: {voice.DisplayName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"TTS: Voice failed verification: {voice.DisplayName}. Error: {ex.Message}");
+                }
+            }
+            VerifiedVoices = verified;
+            System.Diagnostics.Debug.WriteLine($"TTS: Verification complete. {VerifiedVoices.Count} voices working.");
+        }
+        // ---------------------------
+
         public static void RefreshFiles()
         {
             var paths = AddedPaths.ToList();
@@ -261,27 +294,27 @@ namespace RMPlayer
 								synthesizer = new Windows.Media.SpeechSynthesis.SpeechSynthesizer();
 								System.Diagnostics.Debug.WriteLine("TTS: Synthesizer created");
 
-								var allVoices = Windows.Media.SpeechSynthesis.SpeechSynthesizer.AllVoices.ToList();
-								System.Diagnostics.Debug.WriteLine($"TTS: Found {allVoices.Count} voices");
+								var voices = RM.VerifiedVoices;
+								System.Diagnostics.Debug.WriteLine($"TTS: Using {voices.Count} verified voices (from total {Windows.Media.SpeechSynthesis.SpeechSynthesizer.AllVoices.Count})");
 
-								if (allVoices.Count == 0)
+								if (voices.Count == 0)
 								{
-									MessageBox.Show("В системе не установлены голоса для синтеза речи.\n\nУстановите языковые пакеты Windows или отключите TTS в настройках.", "TTS недоступен");
+									MessageBox.Show("В системе не найдены РАБОЧИЕ голоса для синтеза речи.\n\nУстановите языковые пакеты Windows или отключите TTS в настройках.", "TTS недоступен");
 									return;
 								}
 
-								var voice = allVoices
+								var voice = voices
 									.OrderBy(v => v.DisplayName.Contains("Natural") ? 0 : 1)
 									.FirstOrDefault(v => v.Language.StartsWith(langToFind));
 
 								if (voice == null)
 								{
-									voice = allVoices.FirstOrDefault();
-									System.Diagnostics.Debug.WriteLine($"TTS: Using fallback voice: {voice?.DisplayName}");
+									voice = voices.FirstOrDefault();
+									System.Diagnostics.Debug.WriteLine($"TTS: Using fallback verified voice: {voice?.DisplayName}");
 								}
 								else
 								{
-									System.Diagnostics.Debug.WriteLine($"TTS: Using voice: {voice.DisplayName} ({voice.Language})");
+									System.Diagnostics.Debug.WriteLine($"TTS: Using verified voice: {voice.DisplayName} ({voice.Language})");
 								}
 
 								if (voice == null)

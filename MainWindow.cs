@@ -16,6 +16,7 @@ namespace RMPlayer
         public static void Main(string[] args)
         {
             Lang.Load("ru");
+            RM.VerifyVoices(); // Верифицируем голоса при запуске
             var app = new App();
             app.Run(new MainWindow(args));
         }
