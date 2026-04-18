@@ -23,14 +23,6 @@ namespace RMPlayer
 			if (Lang.Get("downloadWindow.Title") == "downloadWindow.Title")
 				Lang.Load("ru");
 
-            // Проверка наличия yt-dlp
-            if (!File.Exists(RM.YtDlpPath))
-            {
-                MessageBox.Show(Lang.Get("downloadWindow.YtDlpMissing"), Lang.Get("downloadWindow.Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
-                // Закрываем окно после того как оно полностью загрузится, если хотим прервать открытие
-                this.Loaded += (s, e) => Close();
-            }
-
 			// ... остальное
 			Title = Lang.Get("downloadWindow.Title");
             Width = 550;

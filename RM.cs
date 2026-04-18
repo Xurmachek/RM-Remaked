@@ -58,6 +58,16 @@ namespace RMPlayer
         public static string YtDlpPath = @"C:\Users\Denis\Desktop\YoutubeDLP\yt-dlp.exe";
         public static string FfmpegPath = @"C:\Users\Denis\Desktop\YoutubeDLP\ffmpeg-6.1.1-full_build\bin";
 
+        public static bool IsYtDlpValid()
+        {
+            if (string.IsNullOrWhiteSpace(YtDlpPath) || !File.Exists(YtDlpPath))
+                return false;
+
+            var ext = Path.GetExtension(YtDlpPath).ToLowerInvariant();
+            string[] validExts = { ".exe", ".bat", ".cmd" };
+            return validExts.Contains(ext);
+        }
+
         public static List<string> AddedPaths = new List<string>();
 
         // --- ВЕРИФИКАЦИЯ ГОЛОСОВ ---

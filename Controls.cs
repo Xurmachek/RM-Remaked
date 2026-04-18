@@ -193,7 +193,21 @@ namespace RMPlayer
         public DownloadButton()
         {
             Click += (_, __) =>
+            {
+                if (!File.Exists(RM.YtDlpPath))
+                {
+                    MessageBox.Show(Lang.Get("downloadWindow.YtDlpMissing"), Lang.Get("downloadWindow.Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!RM.IsYtDlpValid())
+                {
+                    MessageBox.Show(Lang.Get("downloadWindow.YtDlpInvalidExt"), Lang.Get("downloadWindow.Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Продолжаем открытие окна после предупреждения
+                }
+
                 new DownloadWindow { Owner = Application.Current.MainWindow }.ShowDialog();
+            };
         }
 
         protected override void BuildContent(Canvas canvas)
